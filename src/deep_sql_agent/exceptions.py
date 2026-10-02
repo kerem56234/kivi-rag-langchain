@@ -9,3 +9,7 @@ class AgentError(Exception):
 
 class SQLValidationError(AgentError):
     """Raised when a SQL query fails validation."""
+
+
+class DatabaseError(AgentError):
+    """Raised when database setup or access fails."""

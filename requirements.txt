@@ -1,0 +1,7 @@
+pytest
+langchain
+langchain-community
+langchain-ollama
+sqlalchemy
+psycopg
+psycopg-binary
