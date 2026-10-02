@@ -13,3 +13,7 @@ class SQLValidationError(AgentError):
 
 class DatabaseError(AgentError):
     """Raised when database setup or access fails."""
+
+
+class ModelError(AgentError):
+    """Raised when model setup fails."""
