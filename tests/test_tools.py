@@ -78,4 +78,4 @@ def test_tool_exposes_name_and_description():
     tool = SQLExecutionTool(database=database, validator=validator)
 
     assert tool.name == "safe_sql_execution"
-    assert "validated read-only SQL" in tool.description.lower()
+    assert "validated read-only sql" in tool.description.lower()
