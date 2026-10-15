@@ -15,8 +15,28 @@ class ApplicationFactory:
 
     @staticmethod
     def create_service(settings: AppSettings) -> AgentService:
-        raise NotImplementedError
+        if settings is None:
+            raise ValueError("settings must not be None.")
+
+        database_connector = DatabaseConnector(
+            database_uri=settings.database_uri,
+        )
+        model_factory = OllamaModelFactory(
+            model=settings.ollama_model,
+            base_url=settings.ollama_base_url,
+            temperature=settings.temperature,
+        )
+        validator = SQLQueryValidator(read_only=True)
+        prompt_builder = AgentPromptBuilder()
+
+        return AgentService(
+            database_connector=database_connector,
+            model_factory=model_factory,
+            validator=validator,
+            prompt_builder=prompt_builder,
+        )
 
     @classmethod
     def from_environment(cls) -> AgentService:
-        raise NotImplementedError
+        settings = AppSettings.from_env()
+        return cls.create_service(settings)
