@@ -17,3 +17,6 @@ class DatabaseError(AgentError):
 
 class ModelError(AgentError):
     """Raised when model setup fails."""
+
+class AgentExecutionError(AgentError):
+    """Raised when the SQL agent cannot produce an answer."""
