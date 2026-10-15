@@ -13,3 +13,6 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+
+[project.scripts]
+deep-sql-agent = "deep_sql_agent.cli:main"
