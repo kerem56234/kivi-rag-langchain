@@ -20,3 +20,6 @@ class ModelError(AgentError):
 
 class AgentExecutionError(AgentError):
     """Raised when the SQL agent cannot produce an answer."""
+
+class AgentConfigurationError(AgentError):
+    """Raised when the LangChain SQL agent cannot be configured."""
