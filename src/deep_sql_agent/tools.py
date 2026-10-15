@@ -4,9 +4,10 @@ from __future__ import annotations
 
 from typing import Any
 
+from langchain_core.tools import BaseTool, StructuredTool
+
 from deep_sql_agent.exceptions import DatabaseError, SQLValidationError
 
-from langchain_core.tools import BaseTool
 
 class SQLExecutionTool:
     """Executes SQL only after validation."""
@@ -25,6 +26,7 @@ class SQLExecutionTool:
         self._validator = validator
 
     def run(self, query: str) -> str:
+        """Validate and execute a read-only SQL query."""
         validation_result = self._validator.validate(query)
 
         if not validation_result.is_valid:
@@ -38,5 +40,9 @@ class SQLExecutionTool:
             ) from exc
 
     def as_langchain_tool(self) -> BaseTool:
-        """Expose this safe executor as a LangChain tool."""
-        raise NotImplementedError
+        """Expose this safe executor as a LangChain structured tool."""
+        return StructuredTool.from_function(
+            func=self.run,
+            name=self.name,
+            description=self.description,
+        )
