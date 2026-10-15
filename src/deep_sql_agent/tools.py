@@ -6,6 +6,7 @@ from typing import Any
 
 from deep_sql_agent.exceptions import DatabaseError, SQLValidationError
 
+from langchain_core.tools import BaseTool
 
 class SQLExecutionTool:
     """Executes SQL only after validation."""
@@ -35,3 +36,7 @@ class SQLExecutionTool:
             raise DatabaseError(
                 "Failed to execute SQL query."
             ) from exc
+
+    def as_langchain_tool(self) -> BaseTool:
+        """Expose this safe executor as a LangChain tool."""
+        raise NotImplementedError
