@@ -96,3 +96,25 @@ def test_build_chat_prompt_exposes_required_input_variables(schema_context):
         "agent_scratchpad",
         "user_question",
     }
+@pytest.mark.parametrize(
+    "required_instruction",
+    [
+        "must call safe_sql_execution",
+        "never return an sql query for the user to execute",
+        "generating sql text is not equivalent to querying the database",
+        "inspect the returned rows",
+        "final answer must be based on tool output",
+        "if execution fails",
+        "if no rows are returned",
+        "do not invent or estimate results",
+    ],
+)
+def test_build_system_prompt_requires_grounded_tool_execution(
+    schema_context,
+    required_instruction,
+):
+    builder = AgentPromptBuilder()
+
+    prompt = builder.build_system_prompt(schema_context)
+
+    assert required_instruction in prompt.lower()
