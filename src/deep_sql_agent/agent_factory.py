@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from langchain.agents import create_agent
+from langchain_core.messages import ToolMessage
 
 from deep_sql_agent.agent import SQLAgent
 from deep_sql_agent.exceptions import AgentConfigurationError
@@ -12,6 +13,8 @@ from deep_sql_agent.exceptions import AgentConfigurationError
 
 class LangChainAgentAdapter:
     """Adapts a LangChain agent graph to the SQLAgent executor contract."""
+
+    SAFE_SQL_TOOL_NAME = "safe_sql_execution"
 
     def __init__(self, langchain_agent: Any) -> None:
         if langchain_agent is None:
@@ -43,10 +46,91 @@ class LangChainAgentAdapter:
                 "LangChain agent did not return a valid final answer."
             )
 
+        if not self._has_completed_safe_sql_execution(messages):
+            raise AgentConfigurationError(
+                "The agent answered without executing "
+                "safe_sql_execution."
+            )
+
         return {
             "output": final_answer,
             "intermediate_steps": list(messages[:-1]),
         }
+
+    @classmethod
+    def _has_completed_safe_sql_execution(
+        cls,
+        messages: list[Any],
+    ) -> bool:
+        safe_call_ids = cls._collect_safe_sql_call_ids(messages)
+        completed_call_ids = cls._collect_completed_tool_call_ids(
+            messages
+        )
+
+        return bool(safe_call_ids.intersection(completed_call_ids))
+
+    @classmethod
+    def _collect_safe_sql_call_ids(
+        cls,
+        messages: list[Any],
+    ) -> set[str]:
+        safe_call_ids: set[str] = set()
+
+        for message in messages:
+            tool_calls = getattr(message, "tool_calls", None)
+
+            if not isinstance(tool_calls, (list, tuple)):
+                continue
+
+            for tool_call in tool_calls:
+                tool_name = cls._tool_call_value(
+                    tool_call,
+                    "name",
+                )
+                tool_call_id = cls._tool_call_value(
+                    tool_call,
+                    "id",
+                )
+
+                if (
+                    tool_name == cls.SAFE_SQL_TOOL_NAME
+                    and isinstance(tool_call_id, str)
+                    and tool_call_id
+                ):
+                    safe_call_ids.add(tool_call_id)
+
+        return safe_call_ids
+
+    @staticmethod
+    def _collect_completed_tool_call_ids(
+        messages: list[Any],
+    ) -> set[str]:
+        completed_call_ids: set[str] = set()
+
+        for message in messages:
+            if not isinstance(message, ToolMessage):
+                continue
+
+            tool_call_id = getattr(
+                message,
+                "tool_call_id",
+                None,
+            )
+
+            if isinstance(tool_call_id, str) and tool_call_id:
+                completed_call_ids.add(tool_call_id)
+
+        return completed_call_ids
+
+    @staticmethod
+    def _tool_call_value(
+        tool_call: Any,
+        field_name: str,
+    ) -> Any:
+        if isinstance(tool_call, dict):
+            return tool_call.get(field_name)
+
+        return getattr(tool_call, field_name, None)
 
     @staticmethod
     def _extract_messages(result: Any) -> list[Any]:
