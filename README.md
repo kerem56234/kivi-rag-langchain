@@ -1,6 +1,3 @@
-Below is a complete updated `README.md` reflecting the current architecture and completed components, without documenting the separately tracked issue. [local-repo-converted(5).txt]
-
-````markdown
 # KIVI RAG LangChain
 
 A local-first, test-driven SQL agent built with **Python**, **LangChain**, **PostgreSQL**, and **Ollama**.
@@ -884,6 +881,3 @@ Environment configuration
   → normalized response
   → CLI output
 ```
-
-The project is now in the integration and hardening phase. The next priorities are repeatable end-to-end tests, restricted schema access, stronger SQL analysis, query limits, and operational logging.
-````
