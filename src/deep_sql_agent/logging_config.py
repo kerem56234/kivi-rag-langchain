@@ -44,10 +44,11 @@ def configure_logging(debug: bool = False) -> None:
         "httpcore",
         "httpx",
         "urllib3",
-        "sqlalchemy",
     ):
         logging.getLogger(logger_name).setLevel(dependency_level)
-
+    logging.getLogger("sqlalchemy").setLevel(logging.WARNING)
+    logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
+    logging.getLogger("sqlalchemy.engine.Engine").setLevel(logging.WARNING)
 
 def redact_sensitive_text(value: Any) -> str:
     """Return a string with common credential formats redacted."""
