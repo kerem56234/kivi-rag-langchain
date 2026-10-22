@@ -98,3 +98,79 @@ def test_test_connection_returns_false_when_select_one_fails():
 
     assert result is False
     fake_database.run.assert_called_once_with("SELECT 1")
+
+def test_constructor_accepts_include_tables():
+    connector = DatabaseConnector(
+        database_uri="postgresql+psycopg://localhost/test_db",
+        include_tables=("delivery_orders", "delivery_order_items"),
+    )
+
+    assert connector.include_tables == (
+        "delivery_orders",
+        "delivery_order_items",
+    )
+
+
+def test_create_sql_database_passes_include_tables():
+    with patch(
+        "deep_sql_agent.database.SQLDatabase"
+    ) as sql_database_class:
+        fake_database = MagicMock()
+        sql_database_class.from_uri.return_value = fake_database
+
+        connector = DatabaseConnector(
+            database_uri="postgresql+psycopg://localhost/test_db",
+            include_tables=(
+                "delivery_orders",
+                "delivery_order_items",
+            ),
+        )
+
+        result = connector.create_sql_database()
+
+    assert result is fake_database
+    sql_database_class.from_uri.assert_called_once_with(
+        "postgresql+psycopg://localhost/test_db",
+        sample_rows_in_table_info=0,
+        include_tables=[
+            "delivery_orders",
+            "delivery_order_items",
+        ],
+    )
+
+
+def test_create_sql_database_omits_include_tables_when_not_configured():
+    with patch(
+        "deep_sql_agent.database.SQLDatabase"
+    ) as sql_database_class:
+        connector = DatabaseConnector(
+            database_uri="postgresql+psycopg://localhost/test_db",
+        )
+
+        connector.create_sql_database()
+
+    sql_database_class.from_uri.assert_called_once_with(
+        "postgresql+psycopg://localhost/test_db",
+        sample_rows_in_table_info=0,
+    )
+
+
+@pytest.mark.parametrize(
+    "include_tables",
+    [
+        [],
+        (),
+        ["delivery_orders"],
+        ("",),
+        ("delivery_orders", 123),
+    ],
+)
+def test_constructor_rejects_invalid_include_tables(include_tables):
+    with pytest.raises(
+        ValueError,
+        match="include_tables",
+    ):
+        DatabaseConnector(
+            database_uri="postgresql+psycopg://localhost/test_db",
+            include_tables=include_tables,
+        )
