@@ -56,6 +56,7 @@ def test_create_service_builds_dependencies_from_settings(settings):
 
     database_connector_class.assert_called_once_with(
         database_uri=settings.database_uri,
+        include_tables=settings.include_tables,
     )
     model_factory_class.assert_called_once_with(
         model=settings.ollama_model,
@@ -101,3 +102,25 @@ def test_from_environment_loads_settings_and_creates_service():
     assert result is service
     from_env.assert_called_once_with()
     create_service.assert_called_once_with(settings)
+
+def test_create_service_passes_include_tables_to_database_connector():
+    settings = AppSettings(
+        database_uri="postgresql+psycopg://localhost/test_db",
+        include_tables=("delivery_orders", "delivery_order_items"),
+    )
+
+    with (
+        patch(
+            "deep_sql_agent.application.DatabaseConnector",
+        ) as database_connector_class,
+        patch("deep_sql_agent.application.OllamaModelFactory"),
+        patch("deep_sql_agent.application.SQLQueryValidator"),
+        patch("deep_sql_agent.application.AgentPromptBuilder"),
+        patch("deep_sql_agent.application.AgentService"),
+    ):
+        ApplicationFactory.create_service(settings)
+
+    database_connector_class.assert_called_once_with(
+        database_uri=settings.database_uri,
+        include_tables=settings.include_tables,
+    )
