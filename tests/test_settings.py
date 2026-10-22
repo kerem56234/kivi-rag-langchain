@@ -154,3 +154,95 @@ def test_settings_are_immutable():
 
     with pytest.raises(FrozenInstanceError):
         settings.temperature = 1.0
+
+def test_from_env_reads_include_tables(monkeypatch):
+    monkeypatch.setenv(
+        "DEEP_SQL_DATABASE_URI",
+        "postgresql+psycopg://localhost/test_db",
+    )
+    monkeypatch.setenv(
+        "DEEP_SQL_INCLUDE_TABLES",
+        "delivery_orders, delivery_order_items, customer",
+    )
+
+    settings = AppSettings.from_env()
+
+    assert settings.include_tables == (
+        "delivery_orders",
+        "delivery_order_items",
+        "customer",
+    )
+
+
+def test_from_env_defaults_include_tables_to_none(monkeypatch):
+    monkeypatch.setenv(
+        "DEEP_SQL_DATABASE_URI",
+        "postgresql+psycopg://localhost/test_db",
+    )
+    monkeypatch.delenv("DEEP_SQL_INCLUDE_TABLES", raising=False)
+
+    settings = AppSettings.from_env()
+
+    assert settings.include_tables is None
+
+
+@pytest.mark.parametrize(
+    "raw_tables",
+    [
+        "",
+        " ",
+        ",",
+        "delivery_orders,,customer",
+        "delivery-orders",
+        "delivery_orders;DROP TABLE customer",
+    ],
+)
+def test_from_env_rejects_invalid_include_tables(
+    monkeypatch,
+    raw_tables,
+):
+    monkeypatch.setenv(
+        "DEEP_SQL_DATABASE_URI",
+        "postgresql+psycopg://localhost/test_db",
+    )
+    monkeypatch.setenv("DEEP_SQL_INCLUDE_TABLES", raw_tables)
+
+    with pytest.raises(
+        ValueError,
+        match="DEEP_SQL_INCLUDE_TABLES",
+    ):
+        AppSettings.from_env()
+
+
+def test_constructor_accepts_include_tables_tuple():
+    settings = AppSettings(
+        database_uri="postgresql+psycopg://localhost/test_db",
+        include_tables=("delivery_orders", "customer"),
+    )
+
+    assert settings.include_tables == (
+        "delivery_orders",
+        "customer",
+    )
+
+
+@pytest.mark.parametrize(
+    "include_tables",
+    [
+        (),
+        [],
+        ("",),
+        ("delivery-orders",),
+        ("customer", 123),
+        ("customer", "customer"),
+    ],
+)
+def test_constructor_rejects_invalid_include_tables(include_tables):
+    with pytest.raises(
+        ValueError,
+        match="include_tables",
+    ):
+        AppSettings(
+            database_uri="postgresql+psycopg://localhost/test_db",
+            include_tables=include_tables,
+        )
