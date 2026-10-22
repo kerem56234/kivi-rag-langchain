@@ -21,7 +21,8 @@ def test_create_sql_database_uses_langchain_sql_database_from_uri():
 
         assert database is fake_database
         sql_database_class.from_uri.assert_called_once_with(
-            "postgresql+psycopg://user:password@localhost:5432/test_db"
+            "postgresql+psycopg://user:password@localhost:5432/test_db",
+             sample_rows_in_table_info = 0
         )
 
 
