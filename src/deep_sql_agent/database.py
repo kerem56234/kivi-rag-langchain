@@ -20,7 +20,10 @@ class DatabaseConnector:
 
     def create_sql_database(self) -> SQLDatabase:
         try:
-            return SQLDatabase.from_uri(self._database_uri)
+            return SQLDatabase.from_uri(
+                self._database_uri,
+                sample_rows_in_table_info=0,
+            )
         except Exception as exc:
             raise DatabaseError(
                 "Failed to create LangChain SQLDatabase."
