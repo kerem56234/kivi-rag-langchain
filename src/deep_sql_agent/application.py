@@ -20,6 +20,7 @@ class ApplicationFactory:
 
         database_connector = DatabaseConnector(
             database_uri=settings.database_uri,
+            include_tables=settings.include_tables,
         )
         model_factory = OllamaModelFactory(
             model=settings.ollama_model,
