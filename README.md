@@ -71,7 +71,7 @@ Natural-language question
 | `agent_factory.py` | Builds and adapts the LangChain agent |
 | `agent.py` | Exposes a stable application-facing response interface |
 | `logging_config.py` | Configures normal/debug logging and safe log helpers |
-| `cli.py` | Implements the `deep-sql-agent` command |
+| `cli.py` | Implements the `kiKI` command |
 | `exceptions.py` | Defines application-specific exceptions |
 
 ---
@@ -244,13 +244,13 @@ Do not commit database credentials to version control.
 Ask one natural-language question:
 
 ```bash
-deep-sql-agent "How many customers are there?"
+kiKI "How many customers are there?"
 ```
 
 Questions can also be supplied as separate shell arguments:
 
 ```bash
-deep-sql-agent How many customers are there?
+kiKI How many customers are there?
 ```
 
 Quote questions when they contain shell-special characters.
@@ -260,7 +260,7 @@ Quote questions when they contain shell-special characters.
 ```bash
 export DEEP_SQL_INCLUDE_TABLES='delivery_orders,delivery_order_items,customer'
 
-deep-sql-agent \
+kiKI \
   "Haben Kunden elektrische Kabel bestellt?"
 ```
 
@@ -273,7 +273,7 @@ The agent can only reason about tables included in the current allowlist.
 Enable detailed diagnostics with `--debug`:
 
 ```bash
-deep-sql-agent --debug \
+kiKI --debug \
   "Schau dir die Tabelle delivery_orders an und sag mir, was du findest."
 ```
 
@@ -288,13 +288,13 @@ Debug mode provides:
 Normal mode prints concise user-facing errors:
 
 ```bash
-deep-sql-agent "Question"
+kiKI "Question"
 ```
 
 Debug mode prints detailed diagnostics to standard error:
 
 ```bash
-deep-sql-agent --debug "Question"
+kiKI --debug "Question"
 ```
 
 SQLAlchemy engine statement logging is intentionally kept at `WARNING` to avoid printing hundreds of schema-reflection statements.
@@ -647,7 +647,7 @@ Do not treat increasing the context window as the primary solution. First remove
 Rerun with debug mode:
 
 ```bash
-deep-sql-agent --debug "Your question"
+kiKI --debug "Your question"
 ```
 
 Read the chained traceback from the bottom upward:

@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 def build_parser() -> argparse.ArgumentParser:
     """Build the command-line argument parser."""
     parser = argparse.ArgumentParser(
-        prog="deep-sql-agent",
+        prog="kiKI",
         description=(
             "Ask a natural-language question about the configured database."
         ),

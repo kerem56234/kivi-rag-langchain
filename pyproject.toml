@@ -15,4 +15,4 @@ testpaths = ["tests"]
 pythonpath = ["src"]
 
 [project.scripts]
-deep-sql-agent = "deep_sql_agent.cli:main"
+kiKI = "deep_sql_agent.cli:main"
